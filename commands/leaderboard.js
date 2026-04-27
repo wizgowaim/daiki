@@ -3,7 +3,6 @@ const path = require("path");
 const { getRR } = require("../services/valorant");
 const { EmbedBuilder } = require("discord.js");
 
-// 🎯 format RR (2 derniers chiffres comme tu voulais)
 function formatRR(rr) {
   return rr.toString().slice(-2);
 }
@@ -33,30 +32,26 @@ module.exports = {
       });
     }
 
-    // 🏁 tri décroissant
     players.sort((a, b) => b.rr - a.rr);
 
     const medals = ["🥇", "🥈", "🥉"];
 
-    // 🎮 style VCT clean
     let description = "";
 
     players.forEach((p, i) => {
       const pos = i + 1;
-      const medal = medals[i] || `#${pos}`;
+      const medal = medals[i] || `**${pos}ème**`;
 
-      description += `**${medal} ${p.name}**\n`;
-      description += `Rank: **${p.rank}**\n`;
-      description += `RR: **${formatRR(p.rr)}**\n`;
-      description += `────────────────────\n`;
+      description += `${medal} **${p.name}**\n`;
+      description += `➜ ${p.rank} | **${formatRR(p.rr)} RR**\n\n`;
     });
 
     const embed = new EmbedBuilder()
-      .setTitle("🏆 VALORANT CHAMPIONS TOUR — LEADERBOARD")
+      .setTitle("🏆 Leaderboard Valorant")
+      .setColor(0xFD4556) // rouge Valorant style
       .setDescription(description)
-      .setColor(0xff4655) // rouge Valorant officiel
       .setFooter({
-        text: `Updated • ${new Date().toLocaleString("fr-FR")}`
+        text: `Page 1/1 • Mis à jour le ${new Date().toLocaleString("fr-FR")}`
       });
 
     await interaction.editReply({ embeds: [embed] });
