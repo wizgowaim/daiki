@@ -20,7 +20,7 @@ function translateRank(rank) {
     platinum: "Platine",
     diamond: "Diamant",
     ascendant: "Ascendant",
-    immortal: "Immortel",
+    immortal: "Immortal",
     radiant: "Radiant"
   };
 
