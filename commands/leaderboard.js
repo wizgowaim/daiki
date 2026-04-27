@@ -1,69 +1,49 @@
-const { EmbedBuilder } = require("discord.js");
+const fs = require("fs");
+const path = require("path");
 const { getRR } = require("../services/valorant");
-const db = require("../database/db");
 
 module.exports = {
   data: {
     name: "leaderboard",
-    description: "Affiche le classement des joueurs"
+    description: "Affiche le classement Valorant"
   },
 
   async execute(interaction) {
     await interaction.deferReply();
 
-    // 📦 récupération des comptes depuis SQLite
-    db.all(`SELECT * FROM accounts`, async (err, rows) => {
-      if (err) {
-        return interaction.editReply("❌ Erreur base de données");
-      }
+    const accounts = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "../data/accounts.json"))
+    );
 
-      if (!rows.length) {
-        return interaction.editReply("❌ Aucun compte enregistré");
-      }
+    let players = [];
 
-      let players = [];
+    for (const acc of accounts) {
+      const data = await getRR(acc.name, acc.tag);
 
-      // ⚡ récupération RR (API Valorant)
-      for (const acc of rows) {
-        const data = await getRR(acc.name, acc.tag);
-
-        players.push({
-          name: acc.name,
-          rr: data?.rr ?? 0,
-          rank: data?.rank ?? "UNKNOWN"
-        });
-      }
-
-      // 🏆 tri par RR
-      players.sort((a, b) => b.rr - a.rr);
-
-      let description = "";
-
-      players.forEach((p, i) => {
-        const pos = i + 1;
-
-        const medal =
-          pos === 1 ? "🥇 1er" :
-          pos === 2 ? "🥈 2ème" :
-          pos === 3 ? "🥉 3ème" :
-          `${pos}ème`;
-
-        description += `${medal}\n`;
-        description += `${p.name} (${p.rank} | ${p.rr.toString().slice(-2)}rr)\n\n`;
+      players.push({
+        name: acc.name,
+        rr: data.rr,
+        rank: data.rank
       });
+    }
 
-      // 📅 date FR propre
-      const now = new Date().toLocaleString("fr-FR");
+    players.sort((a, b) => b.rr - a.rr);
 
-      const embed = new EmbedBuilder()
-        .setTitle("🏆 Leaderboard Valorant")
-        .setColor(0xFD4556)
-        .setDescription(description)
-        .setFooter({
-          text: `Page 1/1 • ${now}`
-        });
+    const medals = ["🥇", "🥈", "🥉"];
 
-      await interaction.editReply({ embeds: [embed] });
+    let msg = "Classement des joueurs\n\n";
+
+    players.forEach((p, i) => {
+      const pos = i + 1;
+      const medal = medals[i] || `${pos}ème`;
+
+      msg += `${medal} ${pos === 1 ? "1er" : pos === 2 ? "2ème" : pos === 3 ? "3ème" : `${pos}ème`}\n`;
+      msg += `${p.name} (${p.rank} | ${p.rr}rr)\n\n`;
     });
+
+    const time = new Date().toLocaleString("fr-FR");
+    msg += `Page 1/1 • Aujourd’hui à ${time}`;
+
+    await interaction.editReply(msg);
   }
 };
