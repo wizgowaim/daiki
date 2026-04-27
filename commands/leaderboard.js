@@ -70,8 +70,8 @@ module.exports = {
       .setColor(0xFD4556)
       .setDescription(description)
       .setFooter({
-        text: `Page 1/1 • Aujourd’hui à ${new Date().toLocaleString("fr-FR")}`
-      });
+  text: `Page 1/1 • ${now}`
+});
 
     await interaction.editReply({ embeds: [embed] });
   }
