@@ -3,35 +3,9 @@ const path = require("path");
 const { getRR } = require("../services/valorant");
 const { EmbedBuilder } = require("discord.js");
 
-// 🎯 format RR (2 derniers chiffres)
+// 🎯 format RR (2 derniers chiffres comme tu voulais)
 function formatRR(rr) {
   return rr.toString().slice(-2);
-}
-
-// 🎨 couleur selon rank
-function getColor(rank) {
-  rank = rank.toLowerCase();
-
-  if (rank.includes("iron") || rank.includes("bronze")) return 0x7a7a7a;
-  if (rank.includes("silver") || rank.includes("gold")) return 0xf1c40f;
-  if (rank.includes("platinum")) return 0x3498db;
-  if (rank.includes("diamond")) return 0x9b59b6;
-  if (rank.includes("ascendant")) return 0xe91e63;
-  if (rank.includes("immortal")) return 0xe74c3c;
-  if (rank.includes("radiant")) return 0xf39c12;
-
-  return 0x2f3136;
-}
-
-// 📊 barre de progression
-function createBar(value, max) {
-  const size = 10;
-  const percent = max === 0 ? 0 : value / max;
-
-  const filled = Math.round(size * percent);
-  const empty = size - filled;
-
-  return "█".repeat(filled) + "░".repeat(empty);
 }
 
 module.exports = {
@@ -49,7 +23,6 @@ module.exports = {
 
     let players = [];
 
-    // 🔄 récupération des données API
     for (const acc of accounts) {
       const data = await getRR(acc.name, acc.tag);
 
@@ -60,35 +33,30 @@ module.exports = {
       });
     }
 
-    // 🏁 tri du meilleur au pire
+    // 🏁 tri décroissant
     players.sort((a, b) => b.rr - a.rr);
 
-    const maxRR = Math.max(...players.map(p => p.rr));
     const medals = ["🥇", "🥈", "🥉"];
 
+    // 🎮 style VCT clean
     let description = "";
 
     players.forEach((p, i) => {
       const pos = i + 1;
-      const medal = medals[i] || `**${pos}ème**`;
+      const medal = medals[i] || `#${pos}`;
 
-      const rrFormatted = formatRR(p.rr);
-      const percent = maxRR ? Math.round((p.rr / maxRR) * 100) : 0;
-      const bar = createBar(p.rr, maxRR);
-
-      description += `${medal} **${p.name}**\n`;
-      description += `➜ ${p.rank} | **${rrFormatted} RR**\n`;
-      description += `${bar} ${percent}%\n\n`;
+      description += `**${medal} ${p.name}**\n`;
+      description += `Rank: **${p.rank}**\n`;
+      description += `RR: **${formatRR(p.rr)}**\n`;
+      description += `────────────────────\n`;
     });
 
-    const topRank = players[0]?.rank || "";
-
     const embed = new EmbedBuilder()
-      .setTitle("🏆 Leaderboard Valorant")
-      .setColor(getColor(topRank))
+      .setTitle("🏆 VALORANT CHAMPIONS TOUR — LEADERBOARD")
       .setDescription(description)
+      .setColor(0xff4655) // rouge Valorant officiel
       .setFooter({
-        text: `Page 1/1 • Mis à jour le ${new Date().toLocaleString("fr-FR")}`
+        text: `Updated • ${new Date().toLocaleString("fr-FR")}`
       });
 
     await interaction.editReply({ embeds: [embed] });
