@@ -2,6 +2,19 @@ const fs = require("fs");
 const path = require("path");
 const { getRR } = require("../services/valorant");
 
+function formatRR(rr) {
+  const str = rr.toString();
+
+  const last = str.slice(-1);
+  const secondLast = str.slice(-2, -1);
+
+  if (secondLast === "0") {
+    return last;
+  }
+
+  return str.slice(-2);
+}
+
 module.exports = {
   data: {
     name: "leaderboard",
@@ -38,7 +51,7 @@ module.exports = {
       const medal = medals[i] || `${pos}ème`;
 
       msg += `${medal} ${pos === 1 ? "1er" : pos === 2 ? "2ème" : pos === 3 ? "3ème" : `${pos}ème`}\n`;
-      msg += `${p.name} (${p.rank} | ${p.rr.toString().slice(-2)}rr)\n\n`;
+      msg += `${p.name} (${p.rank} | formatRR(p.rr)rr)\n\n`;
     });
 
     const time = new Date().toLocaleString("fr-FR");
