@@ -1,23 +1,15 @@
 const fs = require("fs");
 const path = require("path");
 
+const filePath = path.resolve(__dirname, "../data/accounts.json");
+
 module.exports = {
   data: {
     name: "addaccount",
-    description: "Ajoute un compte Valorant",
+    description: "Ajoute un compte",
     options: [
-      {
-        name: "name",
-        description: "Pseudo Valorant",
-        type: 3,
-        required: true
-      },
-      {
-        name: "tag",
-        description: "Tag (ex: EUW)",
-        type: 3,
-        required: true
-      }
+      { name: "name", type: 3, required: true },
+      { name: "tag", type: 3, required: true }
     ]
   },
 
@@ -25,32 +17,21 @@ module.exports = {
     const name = interaction.options.getString("name");
     const tag = interaction.options.getString("tag");
 
-    const filePath = path.join(__dirname, "../data/accounts.json");
-
     let accounts = [];
 
+    // 📥 lire fichier
     if (fs.existsSync(filePath)) {
       accounts = JSON.parse(fs.readFileSync(filePath));
     }
 
-    // éviter doublons
-    const exists = accounts.find(
-      a => a.name.toLowerCase() === name.toLowerCase() && a.tag === tag
-    );
-
-    if (exists) {
-      return interaction.reply({
-        content: "❌ Ce compte existe déjà.",
-        ephemeral: true
-      });
-    }
-
+    // ➕ ajouter compte
     accounts.push({ name, tag });
 
+    // 💾 sauvegarder
     fs.writeFileSync(filePath, JSON.stringify(accounts, null, 2));
 
-    return interaction.reply({
-      content: `✅ Compte ajouté : **${name}#${tag}**`,
+    await interaction.reply({
+      content: `✅ Ajouté : ${name}#${tag}`,
       ephemeral: true
     });
   }
