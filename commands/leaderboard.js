@@ -71,7 +71,7 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setTitle("Classement des joueurs")
-      .setColor(0x120d11)
+      .setColor(0x271d25)
       .setDescription(description)
       .setFooter({
         text: `Page 1/1 • ${date} à ${time}`
