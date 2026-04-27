@@ -20,11 +20,11 @@ function translateRank(rank) {
     platinum: "Platine",
     diamond: "Diamant",
     ascendant: "Ascendant",
-    immortal: "Immortal",
+    immortal: "Immortel",
     radiant: "Radiant"
   };
 
-  const lower = rank.toLowerCase();
+  const lower = rank?.toLowerCase() || "";
 
   for (const key in map) {
     if (lower.includes(key)) {
@@ -48,24 +48,21 @@ module.exports = {
       fs.readFileSync(path.join(__dirname, "../data/accounts.json"))
     );
 
-    let players = [];
+    // ⚡ appels API en parallèle (beaucoup plus rapide)
+    const results = await Promise.all(
+      accounts.map(acc => getRR(acc.name, acc.tag))
+    );
 
-    // ⚡ récupération des données
-    for (const acc of accounts) {
-      const data = await getRR(acc.name, acc.tag);
-
-      players.push({
-        name: acc.name,
-        rr: data?.rr ?? 0,
-        rank: data?.rank ?? "UNKNOWN"
-      });
-    }
+    let players = accounts.map((acc, i) => ({
+      name: acc.name,
+      rr: results[i]?.rr ?? 0,
+      rank: results[i]?.rank ?? "UNKNOWN"
+    }));
 
     // 🏆 tri
     players.sort((a, b) => b.rr - a.rr);
 
     const medals = ["🥇", "🥈", "🥉"];
-
     let description = "";
 
     players.forEach((p, i) => {
