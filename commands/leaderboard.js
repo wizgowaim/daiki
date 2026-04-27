@@ -71,7 +71,7 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setTitle("Classement des joueurs")
-      .setColor(0x271d25)
+      .setColor(0x1c171b)
       .setDescription(description)
       });
 
