@@ -1,30 +1,16 @@
-const fs = require("fs");
-const path = require("path");
-const { getRR } = require("../services/valorant");
-const { EmbedBuilder } = require("discord.js");
+async execute(interaction) {
+  await interaction.deferReply();
 
-function formatRR(rr) {
-  if (rr === undefined || rr === null) return "0";
-  return rr.toString().slice(-2);
-}
+  const db = require("../database/db");
 
-module.exports = {
-  data: {
-    name: "leaderboard",
-    description: "Affiche le classement des joueurs"
-  },
-
-  async execute(interaction) {
-    await interaction.deferReply();
-
-    const accounts = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "../data/accounts.json"))
-    );
+  db.all(`SELECT * FROM accounts`, async (err, rows) => {
+    if (err) {
+      return interaction.editReply("❌ Erreur base de données");
+    }
 
     let players = [];
 
-    // ⚡ récupération des données
-    for (const acc of accounts) {
+    for (const acc of rows) {
       const data = await getRR(acc.name, acc.tag);
 
       players.push({
@@ -34,46 +20,24 @@ module.exports = {
       });
     }
 
-    // 🏆 tri
     players.sort((a, b) => b.rr - a.rr);
-
-    const medals = ["🥇", "🥈", "🥉"];
 
     let description = "";
 
     players.forEach((p, i) => {
       const pos = i + 1;
-      const medal = medals[i] || `${pos}ème`;
 
-      if (i < 3) {
-        description += `${medal} ${pos === 1 ? "1er" : pos === 2 ? "2ème" : "3ème"}\n`;
-      } else {
-        description += `${pos}ème\n`;
-      }
-
-      description += `${p.name} (${p.rank} | ${formatRR(p.rr)}rr)\n\n`;
+      description += `${pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : `${pos}ème`}\n`;
+      description += `${p.name} (${p.rank} | ${p.rr.toString().slice(-2)}rr)\n\n`;
     });
 
-    // 📅 date + heure FR propre
-    const now = new Date();
-
-    const date = now.toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    });
-
-    const time = now.toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    });
+    const now = new Date().toLocaleString("fr-FR");
 
     const embed = new EmbedBuilder()
-      .setTitle("Classement des joueurs")
+      .setTitle("Classement des joueurs)
       .setColor(0x1a1519)
       .setDescription(description);
 
     await interaction.editReply({ embeds: [embed] });
-  }
-};
+  });
+}
