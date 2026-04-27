@@ -13,7 +13,11 @@ for (const file of commandFiles) {
 }
 
 client.once("ready", () => {
-  console.log(`✅ Connecté en tant que ${client.user.tag}`);
+  client.user.setPresence({
+    status: "dnd"
+  });
+
+  console.log(`✅ Connecté en tant que ${client.user.tag} en mode Ne pas déranger`);
 });
 
 client.on("interactionCreate", async (interaction) => {
