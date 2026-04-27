@@ -35,7 +35,7 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setTitle("📋 Liste des comptes")
-      .setColor(0xFD4556)
+      .setColor(0x1a1519)
       .setDescription(description)
       .setFooter({
         text: `Total : ${accounts.length} compte(s)`
