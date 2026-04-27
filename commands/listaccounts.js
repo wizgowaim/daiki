@@ -28,8 +28,8 @@ module.exports = {
         .join("\n");
 
       const embed = new EmbedBuilder()
-        .setTitle("📋 Comptes Valorant")
-        .setColor(0xFD4556)
+        .setTitle("📋 Liste des comptes")
+        .setColor(0x1a1519)
         .setDescription(description)
         .setFooter({
           text: `Total : ${rows.length}`
