@@ -1,7 +1,16 @@
 const fs = require("fs");
 const path = require("path");
 
-const accountsPath = path.join(__dirname, "../data/accounts.json");
+const dataDir = process.env.DATA_DIR || path.join(__dirname, "../data");
+const accountsPath = path.join(dataDir, "accounts.json");
+
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+if (!fs.existsSync(accountsPath)) {
+  fs.writeFileSync(accountsPath, "[]");
+}
 
 module.exports = {
   data: {
