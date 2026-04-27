@@ -2,26 +2,29 @@ const axios = require("axios");
 
 async function getRR(name, tag) {
   try {
-    const url = `https://api.henrikdev.xyz/valorant/v1/mmr/eu/${name}/${tag}`;
-
-    const res = await axios.get(url, {
-      headers: {
-        Authorization: process.env.VALORANT_API_KEY
+    const res = await axios.get(
+      `https://api.henrikdev.xyz/valorant/v1/mmr/eu/${name}/${tag}`,
+      {
+        headers: {
+          Authorization: process.env.VALORANT_API_KEY
+        }
       }
-    });
+    );
 
-    console.log("🔥 SUCCESS RESPONSE:");
-    console.log(JSON.stringify(res.data, null, 2));
+    const data = res.data?.data;
 
-    return res.data;
+    return {
+      rr: data?.elo ?? 0,
+      rank: data?.currenttierpatched || data?.tier || "Unknown"
+    };
 
   } catch (err) {
-    console.log("❌ FULL ERROR:");
-    console.log("STATUS:", err.response?.status);
-    console.log("DATA:", err.response?.data);
-    console.log("MESSAGE:", err.message);
+    console.log("API ERROR:", err.response?.data || err.message);
 
-    return null;
+    return {
+      rr: 0,
+      rank: "Unknown"
+    };
   }
 }
 
