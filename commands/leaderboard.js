@@ -70,8 +70,8 @@ module.exports = {
     });
 
     const embed = new EmbedBuilder()
-      .setTitle("🏆 Leaderboard Valorant")
-      .setColor(0xFD4556)
+      .setTitle("Classement des joueurs")
+      .setColor(0x1a1519)
       .setDescription(description);
 
     await interaction.editReply({ embeds: [embed] });
