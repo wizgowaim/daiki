@@ -72,10 +72,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle("🏆 Leaderboard Valorant")
       .setColor(0xFD4556)
-      .setDescription(description)
-      .setFooter({
-        text: `Page 1/1 • ${date} à ${time}`
-      });
+      .setDescription(description);
 
     await interaction.editReply({ embeds: [embed] });
   }
