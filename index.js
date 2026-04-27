@@ -24,13 +24,3 @@ client.on("interactionCreate", async (interaction) => {
 
   await command.execute(interaction);
 });
-
-client.login(process.env.DISCORD_TOKEN);
-
-const { startAutoLeaderboard } = require("./leaderboardAuto");
-
-client.once("ready", async () => {
-  console.log(`Logged in as ${client.user.tag}`);
-
-  await startAutoLeaderboard(client);
-});
