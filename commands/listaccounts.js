@@ -34,7 +34,7 @@ module.exports = {
     });
 
     const embed = new EmbedBuilder()
-      .setTitle("📋 Liste des comptes Valorant")
+      .setTitle("📋 Liste des comptes")
       .setColor(0xFD4556)
       .setDescription(description)
       .setFooter({
