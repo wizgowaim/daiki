@@ -1,5 +1,4 @@
-const fs = require("fs");
-const path = require("path");
+const db = require("../database/db");
 
 module.exports = {
   data: {
@@ -8,7 +7,6 @@ module.exports = {
     options: [
       {
         name: "name",
-        description: "Pseudo Valorant",
         type: 3,
         required: true
       }
@@ -18,35 +16,29 @@ module.exports = {
   async execute(interaction) {
     const name = interaction.options.getString("name");
 
-    const filePath = path.join(__dirname, "../data/accounts.json");
+    db.run(
+      `DELETE FROM accounts WHERE LOWER(name) = LOWER(?)`,
+      [name],
+      function (err) {
+        if (err) {
+          return interaction.reply({
+            content: "❌ Erreur suppression.",
+            ephemeral: true
+          });
+        }
 
-    if (!fs.existsSync(filePath)) {
-      return interaction.reply({
-        content: "❌ Aucun compte trouvé.",
-        ephemeral: true
-      });
-    }
+        if (this.changes === 0) {
+          return interaction.reply({
+            content: "❌ Compte introuvable.",
+            ephemeral: true
+          });
+        }
 
-    let accounts = JSON.parse(fs.readFileSync(filePath));
-
-    const initialLength = accounts.length;
-
-    accounts = accounts.filter(
-      a => a.name.toLowerCase() !== name.toLowerCase()
+        interaction.reply({
+          content: `🗑️ Supprimé : ${name}`,
+          ephemeral: true
+        });
+      }
     );
-
-    if (accounts.length === initialLength) {
-      return interaction.reply({
-        content: "❌ Compte introuvable.",
-        ephemeral: true
-      });
-    }
-
-    fs.writeFileSync(filePath, JSON.stringify(accounts, null, 2));
-
-    return interaction.reply({
-      content: `🗑️ Compte supprimé : **${name}**`,
-      ephemeral: true
-    });
   }
 };
