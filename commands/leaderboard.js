@@ -1,46 +1,69 @@
-async execute(interaction) {
-  await interaction.deferReply();
+const { EmbedBuilder } = require("discord.js");
+const { getRR } = require("../services/valorant");
+const db = require("../database/db");
 
-  const db = require("../database/db");
+module.exports = {
+  data: {
+    name: "leaderboard",
+    description: "Affiche le classement des joueurs"
+  },
 
-  db.all(`SELECT * FROM accounts`, async (err, rows) => {
-    if (err) {
-      return interaction.editReply("❌ Erreur base de données");
-    }
+  async execute(interaction) {
+    await interaction.deferReply();
 
-    let players = [];
+    // 📦 récupération des comptes depuis SQLite
+    db.all(`SELECT * FROM accounts`, async (err, rows) => {
+      if (err) {
+        return interaction.editReply("❌ Erreur base de données");
+      }
 
-    for (const acc of rows) {
-      const data = await getRR(acc.name, acc.tag);
+      if (!rows.length) {
+        return interaction.editReply("❌ Aucun compte enregistré");
+      }
 
-      players.push({
-        name: acc.name,
-        rr: data?.rr ?? 0,
-        rank: data?.rank ?? "UNKNOWN"
+      let players = [];
+
+      // ⚡ récupération RR (API Valorant)
+      for (const acc of rows) {
+        const data = await getRR(acc.name, acc.tag);
+
+        players.push({
+          name: acc.name,
+          rr: data?.rr ?? 0,
+          rank: data?.rank ?? "UNKNOWN"
+        });
+      }
+
+      // 🏆 tri par RR
+      players.sort((a, b) => b.rr - a.rr);
+
+      let description = "";
+
+      players.forEach((p, i) => {
+        const pos = i + 1;
+
+        const medal =
+          pos === 1 ? "🥇 1er" :
+          pos === 2 ? "🥈 2ème" :
+          pos === 3 ? "🥉 3ème" :
+          `${pos}ème`;
+
+        description += `${medal}\n`;
+        description += `${p.name} (${p.rank} | ${p.rr.toString().slice(-2)}rr)\n\n`;
       });
-    }
 
-    players.sort((a, b) => b.rr - a.rr);
+      // 📅 date FR propre
+      const now = new Date().toLocaleString("fr-FR");
 
-    let description = "";
+      const embed = new EmbedBuilder()
+        .setTitle("🏆 Leaderboard Valorant")
+        .setColor(0xFD4556)
+        .setDescription(description)
+        .setFooter({
+          text: `Page 1/1 • ${now}`
+        });
 
-    players.forEach((p, i) => {
-      const pos = i + 1;
-
-      description += `${pos === 1 ? "🥇" : pos === 2 ? "🥈" : pos === 3 ? "🥉" : `${pos}ème`}\n`;
-      description += `${p.name} (${p.rank} | ${p.rr.toString().slice(-2)}rr)\n\n`;
+      await interaction.editReply({ embeds: [embed] });
     });
-
-    const now = new Date().toLocaleString("fr-FR");
-
-    const embed = new EmbedBuilder()
-      .setTitle("🏆 Leaderboard Valorant")
-      .setColor(0xFD4556)
-      .setDescription(description)
-      .setFooter({
-        text: `Page 1/1 • ${now}`
-      });
-
-    await interaction.editReply({ embeds: [embed] });
-  });
-}
+  }
+};
