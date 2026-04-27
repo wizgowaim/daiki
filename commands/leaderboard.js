@@ -23,7 +23,7 @@ module.exports = {
 
     let players = [];
 
-    // ⚡ récupération RR
+    // ⚡ récupération des données
     for (const acc of accounts) {
       const data = await getRR(acc.name, acc.tag);
 
@@ -34,7 +34,7 @@ module.exports = {
       });
     }
 
-    // 🏆 tri décroissant
+    // 🏆 tri
     players.sort((a, b) => b.rr - a.rr);
 
     const medals = ["🥇", "🥈", "🥉"];
@@ -46,32 +46,36 @@ module.exports = {
       const medal = medals[i] || `${pos}ème`;
 
       if (i < 3) {
-        // 🥇🥈🥉 format spécial
         description += `${medal} ${pos === 1 ? "1er" : pos === 2 ? "2ème" : "3ème"}\n`;
       } else {
-        // autres positions
         description += `${pos}ème\n`;
       }
 
       description += `${p.name} (${p.rank} | ${formatRR(p.rr)}rr)\n\n`;
     });
 
-    const now = new Date().toLocaleString("fr-FR", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false
-});
+    // 📅 date + heure FR propre
+    const now = new Date();
+
+    const date = now.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
+
+    const time = now.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
 
     const embed = new EmbedBuilder()
-      .setTitle("Classement des joueurs")
+      .setTitle("🏆 Leaderboard Valorant")
       .setColor(0xFD4556)
       .setDescription(description)
       .setFooter({
-  text: `Page 1/1 • ${now}`
-});
+        text: `Page 1/1 • ${date} à ${time}`
+      });
 
     await interaction.editReply({ embeds: [embed] });
   }
