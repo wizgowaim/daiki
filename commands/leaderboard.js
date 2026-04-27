@@ -1,12 +1,14 @@
-const { EmbedBuilder } = require("discord.js");
-const db = require("../database/db");
+const fs = require("fs");
+const path = require("path");
 const { getRR } = require("../services/valorant");
+const { EmbedBuilder } = require("discord.js");
 
 function formatRR(rr) {
-  if (!rr) return "0";
+  if (rr === undefined || rr === null) return "0";
   return rr.toString().slice(-2);
 }
 
+// 🇫🇷 traduction des ranks
 function translateRank(rank) {
   if (!rank) return "Inconnu";
 
@@ -22,7 +24,7 @@ function translateRank(rank) {
     radiant: "Radiant"
   };
 
-  const lower = rank.toLowerCase();
+  const lower = rank?.toLowerCase() || "";
 
   for (const key in map) {
     if (lower.includes(key)) {
@@ -36,56 +38,51 @@ function translateRank(rank) {
 module.exports = {
   data: {
     name: "leaderboard",
-    description: "Classement des joueurs"
+    description: "Affiche le classement des joueurs"
   },
 
   async execute(interaction) {
     await interaction.deferReply();
 
-    db.all(`SELECT * FROM accounts`, async (err, rows) => {
-      if (err) {
-        return interaction.editReply("❌ Erreur DB");
+    const accounts = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "../data/accounts.json"))
+    );
+
+    // ⚡ appels API en parallèle (beaucoup plus rapide)
+    const results = await Promise.all(
+      accounts.map(acc => getRR(acc.name, acc.tag))
+    );
+
+    let players = accounts.map((acc, i) => ({
+      name: acc.name,
+      rr: results[i]?.rr ?? 0,
+      rank: results[i]?.rank ?? "UNKNOWN"
+    }));
+
+    // 🏆 tri
+    players.sort((a, b) => b.rr - a.rr);
+
+    const medals = ["🥇", "🥈", "🥉"];
+    let description = "";
+
+    players.forEach((p, i) => {
+      const pos = i + 1;
+      const medal = medals[i] || `${pos}ème`;
+
+      if (i < 3) {
+        description += `${medal} ${pos === 1 ? "1er" : pos === 2 ? "2ème" : "3ème"}\n`;
+      } else {
+        description += `${pos}ème\n`;
       }
 
-      if (!rows.length) {
-        return interaction.editReply("❌ Aucun compte");
-      }
-
-      // ⚡ appels API en parallèle
-      const results = await Promise.all(
-        rows.map(acc => getRR(acc.name, acc.tag))
-      );
-
-      let players = rows.map((acc, i) => ({
-        name: acc.name,
-        rr: results[i]?.rr ?? 0,
-        rank: results[i]?.rank ?? "UNKNOWN"
-      }));
-
-      // 🏆 tri
-      players.sort((a, b) => b.rr - a.rr);
-
-      let description = "";
-
-      players.forEach((p, i) => {
-        const pos = i + 1;
-
-        const label =
-          pos === 1 ? "🥇 1er" :
-          pos === 2 ? "🥈 2ème" :
-          pos === 3 ? "🥉 3ème" :
-          `${pos}ème`;
-
-        description += `${label}\n`;
-        description += `${p.name} (${translateRank(p.rank)} | ${formatRR(p.rr)}rr)\n\n`;
-      });
-
-      const embed = new EmbedBuilder()
-        .setTitle("Classement des joueurs")
-        .setColor(0x1a1519)
-        .setDescription(description);
-
-      await interaction.editReply({ embeds: [embed] });
+      description += `${p.name} (${translateRank(p.rank)} | ${formatRR(p.rr)}rr)\n\n`;
     });
+
+    const embed = new EmbedBuilder()
+      .setTitle("Classement des joueurs")
+      .setColor(0x1a1519)
+      .setDescription(description);
+
+    await interaction.editReply({ embeds: [embed] });
   }
 };
