@@ -3,16 +3,7 @@ const path = require("path");
 const { getRR } = require("../services/valorant");
 
 function formatRR(rr) {
-  const str = rr.toString();
-
-  const last = str.slice(-1);
-  const secondLast = str.slice(-2, -1);
-
-  if (secondLast === "0") {
-    return last;
-  }
-
-  return str.slice(-2);
+  return rr.toString().slice(-2);
 }
 
 module.exports = {
@@ -40,6 +31,7 @@ module.exports = {
       });
     }
 
+    // tri par elo décroissant
     players.sort((a, b) => b.rr - a.rr);
 
     const medals = ["🥇", "🥈", "🥉"];
@@ -51,7 +43,7 @@ module.exports = {
       const medal = medals[i] || `${pos}ème`;
 
       msg += `${medal} ${pos === 1 ? "1er" : pos === 2 ? "2ème" : pos === 3 ? "3ème" : `${pos}ème`}\n`;
-      msg += `${p.name} (${p.rank} | formatRR(p.rr)rr)\n\n`;
+      msg += `${p.name} (${p.rank} | ${formatRR(p.rr)}rr)\n\n`;
     });
 
     const time = new Date().toLocaleString("fr-FR");
