@@ -1,12 +1,9 @@
-const fs = require("fs");
-const path = require("path");
-
-const filePath = path.resolve(__dirname, "../data/accounts.json");
+const db = require("../database/db");
 
 module.exports = {
   data: {
     name: "addaccount",
-    description: "Ajoute un compte",
+    description: "Ajoute un compte Valorant",
     options: [
       { name: "name", type: 3, required: true },
       { name: "tag", type: 3, required: true }
@@ -17,22 +14,22 @@ module.exports = {
     const name = interaction.options.getString("name");
     const tag = interaction.options.getString("tag");
 
-    let accounts = [];
+    db.run(
+      `INSERT INTO accounts (name, tag) VALUES (?, ?)`,
+      [name, tag],
+      function (err) {
+        if (err) {
+          return interaction.reply({
+            content: "❌ Erreur ajout",
+            ephemeral: true
+          });
+        }
 
-    // 📥 lire fichier
-    if (fs.existsSync(filePath)) {
-      accounts = JSON.parse(fs.readFileSync(filePath));
-    }
-
-    // ➕ ajouter compte
-    accounts.push({ name, tag });
-
-    // 💾 sauvegarder
-    fs.writeFileSync(filePath, JSON.stringify(accounts, null, 2));
-
-    await interaction.reply({
-      content: `✅ Ajouté : ${name}#${tag}`,
-      ephemeral: true
-    });
+        interaction.reply({
+          content: `✅ Ajouté : ${name}#${tag}`,
+          ephemeral: true
+        });
+      }
+    );
   }
 };
