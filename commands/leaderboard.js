@@ -3,12 +3,16 @@ const path = require("path");
 const { getRR } = require("../services/valorant");
 const { EmbedBuilder } = require("discord.js");
 
+// 🔢 sécurisation RR
 function formatRR(rr) {
+  if (rr === undefined || rr === null) return "0";
   return rr.toString().slice(-2);
 }
 
 // 🎨 couleur selon rank
 function getColor(rank) {
+  if (!rank) return 0x2f3136;
+
   rank = rank.toLowerCase();
 
   if (rank.includes("iron") || rank.includes("bronze")) return 0x7a7a7a;
@@ -37,16 +41,18 @@ module.exports = {
 
     let players = [];
 
+    // ⚡ récupération RR
     for (const acc of accounts) {
       const data = await getRR(acc.name, acc.tag);
 
       players.push({
         name: acc.name,
-        rr: data.rr,
-        rank: data.rank
+        rr: data?.rr ?? 0,
+        rank: data?.rank ?? "UNKNOWN"
       });
     }
 
+    // 🏆 tri
     players.sort((a, b) => b.rr - a.rr);
 
     const medals = ["🥇", "🥈", "🥉"];
@@ -55,18 +61,26 @@ module.exports = {
 
     players.forEach((p, i) => {
       const pos = i + 1;
-      const medal = medals[i] || `**${pos}ème**`;
 
-      description += `${medal} **${p.name}**\n`;
-      description += `➜ ${p.rank} | **${formatRR(p.rr)} RR**\n\n`;
+      if (i < 3) {
+        // 🔥 TOP 3 STYLE VCT
+        const medal = medals[i];
+
+        description += `${medal} ${pos === 1 ? "1er" : pos === 2 ? "2ème" : "3ème"}\n`;
+        description += `**${p.name}**\n`;
+        description += `➜ ${p.rank} | **${formatRR(p.rr)} RR**\n\n`;
+      } else {
+        // 🧊 RESTE DU RANK
+        description += `**${pos}ème**\n`;
+        description += `${p.name} (${p.rank} | ${formatRR(p.rr)} RR)\n\n`;
+      }
     });
 
-    // 🎨 couleur du TOP 1
-    const topRank = players[0]?.rank || "";
-    const color = getColor(topRank);
+    // 🎨 couleur TOP 1
+    const color = getColor(players[0]?.rank);
 
     const embed = new EmbedBuilder()
-      .setTitle("⬇️ Classement des joueurs")
+      .setTitle("🏆 Classement des joueurs")
       .setColor(color)
       .setDescription(description)
       .setFooter({
