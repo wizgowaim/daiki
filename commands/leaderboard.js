@@ -25,7 +25,7 @@ function getColor(rank) {
 module.exports = {
   data: {
     name: "leaderboard",
-    description: "Affiche le classement Valorant"
+    description: "Affiche le classement des joueurs"
   },
 
   async execute(interaction) {
@@ -66,7 +66,7 @@ module.exports = {
     const color = getColor(topRank);
 
     const embed = new EmbedBuilder()
-      .setTitle("🏆 Leaderboard Valorant")
+      .setTitle("⬇️ Classement des joueurs")
       .setColor(color)
       .setDescription(description)
       .setFooter({
