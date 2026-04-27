@@ -3,6 +3,7 @@ const path = require("path");
 const { getRR } = require("../services/valorant");
 const { EmbedBuilder } = require("discord.js");
 
+// 🎯 format RR (2 derniers chiffres)
 function formatRR(rr) {
   return rr.toString().slice(-2);
 }
@@ -22,6 +23,17 @@ function getColor(rank) {
   return 0x2f3136;
 }
 
+// 📊 barre de progression
+function createBar(value, max) {
+  const size = 10;
+  const percent = max === 0 ? 0 : value / max;
+
+  const filled = Math.round(size * percent);
+  const empty = size - filled;
+
+  return "█".repeat(filled) + "░".repeat(empty);
+}
+
 module.exports = {
   data: {
     name: "leaderboard",
@@ -37,6 +49,7 @@ module.exports = {
 
     let players = [];
 
+    // 🔄 récupération des données API
     for (const acc of accounts) {
       const data = await getRR(acc.name, acc.tag);
 
@@ -47,8 +60,10 @@ module.exports = {
       });
     }
 
+    // 🏁 tri du meilleur au pire
     players.sort((a, b) => b.rr - a.rr);
 
+    const maxRR = Math.max(...players.map(p => p.rr));
     const medals = ["🥇", "🥈", "🥉"];
 
     let description = "";
@@ -57,17 +72,20 @@ module.exports = {
       const pos = i + 1;
       const medal = medals[i] || `**${pos}ème**`;
 
+      const rrFormatted = formatRR(p.rr);
+      const percent = maxRR ? Math.round((p.rr / maxRR) * 100) : 0;
+      const bar = createBar(p.rr, maxRR);
+
       description += `${medal} **${p.name}**\n`;
-      description += `➜ ${p.rank} | **${formatRR(p.rr)} RR**\n\n`;
+      description += `➜ ${p.rank} | **${rrFormatted} RR**\n`;
+      description += `${bar} ${percent}%\n\n`;
     });
 
-    // 🎨 couleur du TOP 1
     const topRank = players[0]?.rank || "";
-    const color = getColor(topRank);
 
     const embed = new EmbedBuilder()
       .setTitle("🏆 Leaderboard Valorant")
-      .setColor(color)
+      .setColor(getColor(topRank))
       .setDescription(description)
       .setFooter({
         text: `Page 1/1 • Mis à jour le ${new Date().toLocaleString("fr-FR")}`
