@@ -14,17 +14,6 @@ for (const file of commandFiles) {
 
 client.once("ready", () => {
   console.log(`✅ Connecté en tant que ${client.user.tag}`);
-
-  // 🔴 statut Ne pas déranger
-  client.user.setPresence({
-    status: "dnd",
-    activities: [
-      {
-        name: "Valorant",
-        type: 0 // Playing
-      }
-    ]
-  });
 });
 
 client.on("interactionCreate", async (interaction) => {
