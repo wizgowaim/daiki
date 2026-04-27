@@ -38,7 +38,7 @@ module.exports = {
       const medal = medals[i] || `${pos}ème`;
 
       msg += `${medal} ${pos === 1 ? "1er" : pos === 2 ? "2ème" : pos === 3 ? "3ème" : `${pos}ème`}\n`;
-      msg += `${p.name} (${p.rank} | ${p.rr}rr)\n\n`;
+      msg += `${p.name} (${p.rank} | ${p.rr.toString().slice(-2)}rr)\n\n`;
     });
 
     const time = new Date().toLocaleString("fr-FR");
