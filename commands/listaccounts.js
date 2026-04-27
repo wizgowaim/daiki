@@ -1,41 +1,46 @@
-const db = require("../database/db");
+const fs = require("fs");
+const path = require("path");
 const { EmbedBuilder } = require("discord.js");
 
 module.exports = {
   data: {
     name: "listaccounts",
-    description: "Liste des comptes Valorant"
+    description: "Affiche la liste des comptes Valorant enregistrés"
   },
 
   async execute(interaction) {
-    db.all(`SELECT * FROM accounts`, [], (err, rows) => {
-      if (err) {
-        return interaction.reply({
-          content: "❌ Erreur DB",
-          ephemeral: true
-        });
-      }
+    const filePath = path.join(__dirname, "../data/accounts.json");
 
-      if (!rows.length) {
-        return interaction.reply({
-          content: "❌ Aucun compte.",
-          ephemeral: true
-        });
-      }
+    if (!fs.existsSync(filePath)) {
+      return interaction.reply({
+        content: "❌ Aucun compte enregistré.",
+        ephemeral: true
+      });
+    }
 
-      let description = rows
-        .map((r, i) => `**${i + 1}.** ${r.name}#${r.tag}`)
-        .join("\n");
+    const accounts = JSON.parse(fs.readFileSync(filePath));
 
-      const embed = new EmbedBuilder()
-        .setTitle("📋 Liste des comptes")
-        .setColor(0x1a1519)
-        .setDescription(description)
-        .setFooter({
-          text: `Total : ${rows.length}`
-        });
+    if (accounts.length === 0) {
+      return interaction.reply({
+        content: "❌ Aucun compte enregistré.",
+        ephemeral: true
+      });
+    }
 
-      interaction.reply({ embeds: [embed], ephemeral: true });
+    let description = "";
+
+    accounts.forEach((acc, i) => {
+      description += `**${i + 1}.** ${acc.name}#${acc.tag}\n`;
     });
+
+    const embed = new EmbedBuilder()
+      .setTitle("📋 Liste des comptes Valorant")
+      .setColor(0xFD4556)
+      .setDescription(description)
+      .setFooter({
+        text: `Total : ${accounts.length} compte(s)`
+      });
+
+    await interaction.reply({ embeds: [embed], ephemeral: true });
   }
 };
