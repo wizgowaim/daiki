@@ -153,10 +153,7 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setTitle("Classement des joueurs")
         .setColor(0x1a1519)
-        .setDescription(description)
-        .setFooter({
-          text: "Classement Valorant mis à jour automatiquement"
-        });
+        .setDescription(description);
 
       return interaction.editReply({
         embeds: [embed]
