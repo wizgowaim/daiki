@@ -11,25 +11,16 @@ async function getRR(name, tag) {
       }
     );
 
-    // 🔍 debug pour voir la vraie réponse API
-    console.log("API RESPONSE:", JSON.stringify(res.data, null, 2));
+    console.log("🔥 FULL API RESPONSE:");
+    console.log(JSON.stringify(res.data, null, 2));
 
-    const data = res.data?.data;
-
-    const current = data?.current_data || data?.current;
-
-    return {
-      rr: current?.mmr ?? 0,
-      rank: current?.currenttierpatched ?? "Unknown"
-    };
+    return { rr: 0, rank: "TEST" };
 
   } catch (err) {
-    console.log("API ERROR:", err.response?.data || err.message);
+    console.log("❌ API ERROR:");
+    console.log(err.response?.data || err.message);
 
-    return {
-      rr: 0,
-      rank: "Unknown"
-    };
+    return { rr: 0, rank: "ERROR" };
   }
 }
 
