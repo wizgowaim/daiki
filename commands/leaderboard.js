@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { getRR } = require("../services/valorant");
+const { EmbedBuilder } = require("discord.js");
 
 function formatRR(rr) {
   return rr.toString().slice(-2);
@@ -31,24 +32,28 @@ module.exports = {
       });
     }
 
-    // tri par elo décroissant
     players.sort((a, b) => b.rr - a.rr);
 
     const medals = ["🥇", "🥈", "🥉"];
 
-    let msg = "Classement des joueurs\n\n";
+    let description = "";
 
     players.forEach((p, i) => {
       const pos = i + 1;
-      const medal = medals[i] || `${pos}ème`;
+      const medal = medals[i] || `**${pos}ème**`;
 
-      msg += `${medal} ${pos === 1 ? "1er" : pos === 2 ? "2ème" : pos === 3 ? "3ème" : `${pos}ème`}\n`;
-      msg += `${p.name} (${p.rank} | ${formatRR(p.rr)}rr)\n\n`;
+      description += `${medal} **${p.name}**\n`;
+      description += `➜ ${p.rank} | **${formatRR(p.rr)} RR**\n\n`;
     });
 
-    const time = new Date().toLocaleString("fr-FR");
-    msg += `Page 1/1 • Aujourd’hui à ${time}`;
+    const embed = new EmbedBuilder()
+      .setTitle("🏆 Leaderboard Valorant")
+      .setColor(0xFD4556) // rouge Valorant style
+      .setDescription(description)
+      .setFooter({
+        text: `Page 1/1 • Mis à jour le ${new Date().toLocaleString("fr-FR")}`
+      });
 
-    await interaction.editReply(msg);
+    await interaction.editReply({ embeds: [embed] });
   }
 };
