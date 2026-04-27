@@ -34,9 +34,12 @@ async execute(interaction) {
     const now = new Date().toLocaleString("fr-FR");
 
     const embed = new EmbedBuilder()
-      .setTitle("Classement des joueurs)
-      .setColor(0x1a1519)
-      .setDescription(description);
+      .setTitle("🏆 Leaderboard Valorant")
+      .setColor(0xFD4556)
+      .setDescription(description)
+      .setFooter({
+        text: `Page 1/1 • ${now}`
+      });
 
     await interaction.editReply({ embeds: [embed] });
   });
