@@ -20,7 +20,7 @@ client.once("ready", () => {
     status: "dnd",
     activities: [
       {
-        name: "Bot de la Team Vortex",
+        name: "Valorant",
         type: 0 // Playing
       }
     ]
