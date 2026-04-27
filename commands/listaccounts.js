@@ -1,46 +1,39 @@
-const fs = require("fs");
-const path = require("path");
+const db = require("../database/db");
 const { EmbedBuilder } = require("discord.js");
 
 module.exports = {
   data: {
     name: "listaccounts",
-    description: "Affiche la liste des comptes Valorant enregistrés"
+    description: "Liste des comptes"
   },
 
   async execute(interaction) {
-    const filePath = path.join(__dirname, "../data/accounts.json");
+    db.all(`SELECT * FROM accounts`, [], (err, rows) => {
+      if (err) {
+        return interaction.reply({
+          content: "❌ Erreur DB",
+          ephemeral: true
+        });
+      }
 
-    if (!fs.existsSync(filePath)) {
-      return interaction.reply({
-        content: "❌ Aucun compte enregistré.",
-        ephemeral: true
-      });
-    }
+      if (!rows.length) {
+        return interaction.reply({
+          content: "❌ Aucun compte",
+          ephemeral: true
+        });
+      }
 
-    const accounts = JSON.parse(fs.readFileSync(filePath));
+      let description = rows
+        .map((r, i) => `**${i + 1}.** ${r.name}#${r.tag}`)
+        .join("\n");
 
-    if (accounts.length === 0) {
-      return interaction.reply({
-        content: "❌ Aucun compte enregistré.",
-        ephemeral: true
-      });
-    }
+      const embed = new EmbedBuilder()
+        .setTitle("📋 Comptes Valorant")
+        .setColor(0xFD4556)
+        .setDescription(description)
+        .setFooter({ text: `Total : ${rows.length}` });
 
-    let description = "";
-
-    accounts.forEach((acc, i) => {
-      description += `**${i + 1}.** ${acc.name}#${acc.tag}\n`;
+      interaction.reply({ embeds: [embed], ephemeral: true });
     });
-
-    const embed = new EmbedBuilder()
-      .setTitle("📋 Liste des comptes Valorant")
-      .setColor(0xFD4556)
-      .setDescription(description)
-      .setFooter({
-        text: `Total : ${accounts.length} compte(s)`
-      });
-
-    await interaction.reply({ embeds: [embed], ephemeral: true });
   }
 };
