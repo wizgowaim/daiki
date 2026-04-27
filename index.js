@@ -20,8 +20,8 @@ client.once("ready", () => {
     status: "dnd",
     activities: [
       {
-        name: "Classement",
-        type: 3 // Watching
+        name: "Bot de la Team Vortex",
+        type: 0 // Playing
       }
     ]
   });
