@@ -56,8 +56,17 @@ module.exports = {
       description += `${p.name} (${p.rank} | ${formatRR(p.rr)}rr)\n\n`;
     });
 
+    const now = new Date().toLocaleString("fr-FR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false
+});
+
     const embed = new EmbedBuilder()
-      .setTitle("🏆 Leaderboard Valorant")
+      .setTitle("Classement des joueurs")
       .setColor(0xFD4556)
       .setDescription(description)
       .setFooter({
