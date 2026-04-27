@@ -24,3 +24,5 @@ client.on("interactionCreate", async (interaction) => {
 
   await command.execute(interaction);
 });
+
+client.login(process.env.DISCORD_TOKEN);
