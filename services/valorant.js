@@ -2,16 +2,15 @@ const axios = require("axios");
 
 async function getRR(name, tag) {
   try {
-    const res = await axios.get(
-      `https://api.henrikdev.xyz/valorant/v1/mmr/eu/${name}/${tag}`,
-      {
-        headers: {
-          Authorization: process.env.VALORANT_API_KEY
-        }
-      }
-    );
+    const url = `https://api.henrikdev.xyz/valorant/v2/mmr/${name}/${tag}`;
 
-    console.log("🔥 FULL API RESPONSE:");
+    const res = await axios.get(url, {
+      headers: {
+        Authorization: process.env.VALORANT_API_KEY
+      }
+    });
+
+    console.log("🔥 RAW API RESPONSE:");
     console.log(JSON.stringify(res.data, null, 2));
 
     return { rr: 0, rank: "TEST" };
