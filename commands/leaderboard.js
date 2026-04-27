@@ -8,6 +8,33 @@ function formatRR(rr) {
   return rr.toString().slice(-2);
 }
 
+// 🇫🇷 traduction des ranks
+function translateRank(rank) {
+  if (!rank) return "Inconnu";
+
+  const map = {
+    iron: "Fer",
+    bronze: "Bronze",
+    silver: "Argent",
+    gold: "Or",
+    platinum: "Platine",
+    diamond: "Diamant",
+    ascendant: "Ascendant",
+    immortal: "Immortel",
+    radiant: "Radiant"
+  };
+
+  const lower = rank.toLowerCase();
+
+  for (const key in map) {
+    if (lower.includes(key)) {
+      return rank.replace(new RegExp(key, "i"), map[key]);
+    }
+  }
+
+  return rank;
+}
+
 module.exports = {
   data: {
     name: "leaderboard",
@@ -51,22 +78,7 @@ module.exports = {
         description += `${pos}ème\n`;
       }
 
-      description += `${p.name} (${p.rank} | ${formatRR(p.rr)}rr)\n\n`;
-    });
-
-    // 📅 date + heure FR propre
-    const now = new Date();
-
-    const date = now.toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    });
-
-    const time = now.toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
+      description += `${p.name} (${translateRank(p.rank)} | ${formatRR(p.rr)}rr)\n\n`;
     });
 
     const embed = new EmbedBuilder()
