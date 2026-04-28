@@ -26,7 +26,6 @@ module.exports = {
       ensureConfigFolder();
 
       const payload = await buildLeaderboardPayload();
-
       const message = await interaction.channel.send(payload);
 
       const config = {
