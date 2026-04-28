@@ -10,11 +10,16 @@ const client = new Client({
 
 client.commands = new Collection();
 
-const commandFiles = fs.readdirSync("./commands").filter(f => f.endsWith(".js"));
+const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
 
 for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
-  client.commands.set(command.data.name, command);
+  try {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.data.name, command);
+    console.log(`✅ Commande chargée : ${command.data.name}`);
+  } catch (error) {
+    console.error(`❌ Erreur dans la commande ${file} :`, error);
+  }
 }
 
 client.once("ready", () => {
@@ -33,7 +38,22 @@ client.on("interactionCreate", async interaction => {
   const command = client.commands.get(interaction.commandName);
   if (!command) return;
 
-  await command.execute(interaction);
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(`❌ Erreur pendant /${interaction.commandName} :`, error);
+
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply({
+        content: "Une erreur est survenue pendant l'exécution de la commande."
+      });
+    } else {
+      await interaction.reply({
+        content: "Une erreur est survenue pendant l'exécution de la commande.",
+        ephemeral: true
+      });
+    }
+  }
 });
 
 client.login(process.env.DISCORD_TOKEN);
